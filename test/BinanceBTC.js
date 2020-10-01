@@ -126,25 +126,33 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         const jsonFile = "test/abi/BTCB.json";
         const abi= JSON.parse(fs.readFileSync(jsonFile));
 
-        const abcToken = await ABCToken.deployed();
+        const ERC20JsonFile = "test/abi/ERC20.json";
+        const ERC20ABI= JSON.parse(fs.readFileSync(ERC20JsonFile));
 
         BTCBOwner = accounts[1];
 
-        const erc20 = new web3.eth.Contract(abi, AdminUpgradeabilityProxy.address);
+        const btcb = new web3.eth.Contract(abi, AdminUpgradeabilityProxy.address);
 
-        const balance1 = await abcToken.balanceOf.call(AdminUpgradeabilityProxy.address);
-        console.log(balance1);
+        const abcToken = new web3.eth.Contract(ERC20ABI, ABCToken.address);
+
+        const balance1 = await abcToken.methods.balanceOf(AdminUpgradeabilityProxy.address).call();
         assert.equal(balance1, web3.utils.toBN(0), "wrong balance");
 
-        await abcToken.transfer(AdminUpgradeabilityProxy.address, web3.utils.toBN(1e18), {from: accounts[0]});
+        await abcToken.methods.transfer(AdminUpgradeabilityProxy.address, web3.utils.toBN(1e18)).send({from: accounts[0], gas: 4700000});
 
-        const balance2 = await abcToken.balanceOf.call(AdminUpgradeabilityProxy.address);
+        const balance2 = await abcToken.methods.balanceOf(AdminUpgradeabilityProxy.address).call();
         assert.equal(balance2, web3.utils.toBN(1e18), "wrong balance");
 
-        await erc20.methods.reclaimToken(ABCToken.address).send({from: BTCBOwner, gas: 4700000});
-
-        const balance3 = await abcToken.balanceOf.call(AdminUpgradeabilityProxy.address);
+        const balance3 = await abcToken.methods.balanceOf(BTCBOwner).call();
         assert.equal(balance3, web3.utils.toBN(0), "wrong balance");
+
+        const tx = await btcb.methods.reclaimToken(ABCToken.address).send({from: accounts[1], gas: 4700000});
+
+        const balance4 = await abcToken.methods.balanceOf(AdminUpgradeabilityProxy.address).call();
+        assert.equal(balance4, web3.utils.toBN(0), "wrong balance");
+
+        const balance5 = await abcToken.methods.balanceOf(BTCBOwner).call();
+        assert.equal(balance5, web3.utils.toBN(1e18), "wrong balance");
     });
 
 });

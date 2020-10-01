@@ -46,7 +46,7 @@ contract ABCToken is SafeMath{
   address public owner;
 
   /* This creates an array with all balances */
-  mapping (address => uint256) public balanceOf;
+  mapping (address => uint256) public _balances;
   mapping (address => uint256) public freezeOf;
   mapping (address => mapping (address => uint256)) public allowance;
 
@@ -69,7 +69,7 @@ contract ABCToken is SafeMath{
     uint8 decimalUnits,
     string tokenSymbol
   ) {
-    balanceOf[msg.sender] = initialSupply;              // Give the creator all initial tokens
+    _balances[msg.sender] = initialSupply;              // Give the creator all initial tokens
     totalSupply = initialSupply;                        // Update total supply
     name = tokenName;                                   // Set the name for display purposes
     symbol = tokenSymbol;                               // Set the symbol for display purposes
@@ -78,14 +78,15 @@ contract ABCToken is SafeMath{
   }
 
   /* Send coins */
-  function transfer(address _to, uint256 _value) {
+  function transfer(address _to, uint256 _value) public returns (bool){
     if (_to == 0x0) throw;                               // Prevent transfer to 0x0 address. Use burn() instead
     if (_value <= 0) throw;
-    if (balanceOf[msg.sender] < _value) throw;           // Check if the sender has enough
-    if (balanceOf[_to] + _value < balanceOf[_to]) throw; // Check for overflows
-    balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);                     // Subtract from the sender
-    balanceOf[_to] = SafeMath.safeAdd(balanceOf[_to], _value);                            // Add the same to the recipient
+    if (_balances[msg.sender] < _value) throw;           // Check if the sender has enough
+    if (_balances[_to] + _value < _balances[_to]) throw; // Check for overflows
+    _balances[msg.sender] = SafeMath.safeSub(_balances[msg.sender], _value);                     // Subtract from the sender
+    _balances[_to] = SafeMath.safeAdd(_balances[_to], _value);                            // Add the same to the recipient
     Transfer(msg.sender, _to, _value);                   // Notify anyone listening that this transfer took place
+    return true;
   }
 
   /* Allow another contract to spend some tokens in your behalf */
@@ -101,29 +102,33 @@ contract ABCToken is SafeMath{
   function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
     if (_to == 0x0) throw;                                // Prevent transfer to 0x0 address. Use burn() instead
     if (_value <= 0) throw;
-    if (balanceOf[_from] < _value) throw;                 // Check if the sender has enough
-    if (balanceOf[_to] + _value < balanceOf[_to]) throw;  // Check for overflows
+    if (_balances[_from] < _value) throw;                 // Check if the sender has enough
+    if (_balances[_to] + _value < _balances[_to]) throw;  // Check for overflows
     if (_value > allowance[_from][msg.sender]) throw;     // Check allowance
-    balanceOf[_from] = SafeMath.safeSub(balanceOf[_from], _value);                           // Subtract from the sender
-    balanceOf[_to] = SafeMath.safeAdd(balanceOf[_to], _value);                             // Add the same to the recipient
+    _balances[_from] = SafeMath.safeSub(_balances[_from], _value);                           // Subtract from the sender
+    _balances[_to] = SafeMath.safeAdd(_balances[_to], _value);                             // Add the same to the recipient
     allowance[_from][msg.sender] = SafeMath.safeSub(allowance[_from][msg.sender], _value);
     Transfer(_from, _to, _value);
     return true;
   }
 
   function burn(uint256 _value) returns (bool success) {
-    if (balanceOf[msg.sender] < _value) throw;            // Check if the sender has enough
+    if (_balances[msg.sender] < _value) throw;            // Check if the sender has enough
     if (_value <= 0) throw;
-    balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);                      // Subtract from the sender
+    _balances[msg.sender] = SafeMath.safeSub(_balances[msg.sender], _value);                      // Subtract from the sender
     totalSupply = SafeMath.safeSub(totalSupply,_value);                                // Updates totalSupply
     Burn(msg.sender, _value);
     return true;
   }
 
+  function balanceOf(address account) external view returns (uint256) {
+    return _balances[account];
+  }
+
   function freeze(uint256 _value) returns (bool success) {
-    if (balanceOf[msg.sender] < _value) throw;            // Check if the sender has enough
+    if (_balances[msg.sender] < _value) throw;            // Check if the sender has enough
     if (_value <= 0) throw;
-    balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);                      // Subtract from the sender
+    _balances[msg.sender] = SafeMath.safeSub(_balances[msg.sender], _value);                      // Subtract from the sender
     freezeOf[msg.sender] = SafeMath.safeAdd(freezeOf[msg.sender], _value);                                // Updates totalSupply
     Freeze(msg.sender, _value);
     return true;
@@ -133,7 +138,7 @@ contract ABCToken is SafeMath{
     if (freezeOf[msg.sender] < _value) throw;            // Check if the sender has enough
     if (_value <= 0) throw;
     freezeOf[msg.sender] = SafeMath.safeSub(freezeOf[msg.sender], _value);                      // Subtract from the sender
-    balanceOf[msg.sender] = SafeMath.safeAdd(balanceOf[msg.sender], _value);
+    _balances[msg.sender] = SafeMath.safeAdd(_balances[msg.sender], _value);
     Unfreeze(msg.sender, _value);
     return true;
   }
