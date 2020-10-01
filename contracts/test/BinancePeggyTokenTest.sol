@@ -650,9 +650,7 @@ contract CanReclaimToken is Ownable {
 // empty block is used as this contract just inherits others.
 contract OwnableContract is CanReclaimToken, Claimable { } /* solhint-disable-line no-empty-blocks */
 
-// File: contracts/token/WBTC.sol
-
-contract BinanceBTC is StandardToken, DetailedERC20,
+contract BinancePeggyTokenTest is StandardToken, DetailedERC20,
 MintableToken, BurnableToken, PausableToken, OwnableContract {
 
     // INITIALIZATION DATA
@@ -679,5 +677,9 @@ MintableToken, BurnableToken, PausableToken, OwnableContract {
 
     function renounceOwnership() public onlyOwner {
         revert("renouncing ownership is blocked");
+    }
+
+    function testUpgrade() public view returns (string) {
+        return "upgrade is successful";
     }
 }

@@ -1,5 +1,5 @@
-const BinanceBTC = artifacts.require("BinanceBTC");
-const BinanceBTCNew = artifacts.require("BinanceBTCNew");
+const BinancePeggyToken = artifacts.require("BinancePeggyToken");
+const BinancePeggyTokenTest = artifacts.require("BinancePeggyTokenTest");
 const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
 const ABCToken = artifacts.require("ABCToken");
 
@@ -170,7 +170,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
 
         const balanceOriginal = await btcb.methods.balanceOf(accounts[2]).call({from: BTCBOwner});
 
-        await upgradeProxy.methods.upgradeTo(BinanceBTCNew.address).send({from: admin, gas: 4700000});
+        await upgradeProxy.methods.upgradeTo(BinancePeggyTokenTest.address).send({from: admin, gas: 4700000});
 
         const message = await btcb.methods.testUpgrade().call({from: accounts[1]});
         assert.equal(message, "upgrade is successful", "wrong balance");
