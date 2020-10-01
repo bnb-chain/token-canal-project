@@ -1,4 +1,5 @@
 const BinanceBTC = artifacts.require("BinanceBTC");
+const BinanceBTCNew = artifacts.require("BinanceBTCNew");
 const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
 const ABCToken = artifacts.require("ABCToken");
 
@@ -9,6 +10,7 @@ module.exports = function(deployer, network, accounts) {
   deployer.then(async () => {
     await deployer.deploy(ABCToken, web3.utils.toBN(100e18), "ABC Token", 18, "ABC");
     await deployer.deploy(BinanceBTC);
+    await deployer.deploy(BinanceBTCNew);
     await deployer.deploy(AdminUpgradeabilityProxy, BinanceBTC.address);
   });
 };

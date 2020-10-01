@@ -1,4 +1,5 @@
 const BinanceBTC = artifacts.require("BinanceBTC");
+const BinanceBTCNew = artifacts.require("BinanceBTCNew");
 const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
 const ABCToken = artifacts.require("ABCToken");
 
@@ -146,7 +147,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         const balance3 = await abcToken.methods.balanceOf(BTCBOwner).call();
         assert.equal(balance3, web3.utils.toBN(0), "wrong balance");
 
-        const tx = await btcb.methods.reclaimToken(ABCToken.address).send({from: accounts[1], gas: 4700000});
+        await btcb.methods.reclaimToken(ABCToken.address).send({from: BTCBOwner, gas: 4700000});
 
         const balance4 = await abcToken.methods.balanceOf(AdminUpgradeabilityProxy.address).call();
         assert.equal(balance4, web3.utils.toBN(0), "wrong balance");
@@ -155,4 +156,31 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         assert.equal(balance5, web3.utils.toBN(1e18), "wrong balance");
     });
 
+    it('Test upgrade', async () => {
+        const upgradeProxyJsonFile = "test/abi/UpgradeProxy.json";
+        const upgradeProxyAbi= JSON.parse(fs.readFileSync(upgradeProxyJsonFile));
+
+        const upgradeProxy = new web3.eth.Contract(upgradeProxyAbi, AdminUpgradeabilityProxy.address);
+        admin = accounts[0];
+
+        const jsonFile = "test/abi/BTCBNew.json";
+        const abi= JSON.parse(fs.readFileSync(jsonFile));
+
+        const btcb = new web3.eth.Contract(abi, AdminUpgradeabilityProxy.address);
+
+        const balanceOriginal = await btcb.methods.balanceOf(accounts[2]).call({from: BTCBOwner});
+
+        await upgradeProxy.methods.upgradeTo(BinanceBTCNew.address).send({from: admin, gas: 4700000});
+
+        const message = await btcb.methods.testUpgrade().call({from: accounts[1]});
+        assert.equal(message, "upgrade is successful", "wrong balance");
+
+        const balanceAfterUpgrade = await btcb.methods.balanceOf(accounts[2]).call({from: BTCBOwner});
+        assert.equal(balanceAfterUpgrade, balanceOriginal, "wrong balance");
+
+        await btcb.methods.transfer(accounts[2], web3.utils.toBN(1e8)).send({from: BTCBOwner, gas: 4700000});
+
+        const balanceNew = await btcb.methods.balanceOf(accounts[2]).call({from: BTCBOwner});
+        assert.equal(web3.utils.toBN(balanceNew.toString()).sub(web3.utils.toBN(balanceAfterUpgrade.toString())).eq(web3.utils.toBN(1e8)), true, "wrong balance");
+    });
 });
