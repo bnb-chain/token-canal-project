@@ -1,5 +1,6 @@
 const BinanceBTC = artifacts.require("BinanceBTC");
 const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
+const ABCToken = artifacts.require("ABCToken");
 
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
@@ -89,6 +90,61 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         assert.equal(allowance, web3.utils.toBN(0), "wrong allowance");
         const balance = await erc20.methods.balanceOf(accounts[4]).call({from: accounts[4]});
         assert.equal(balance, web3.utils.toBN(2e8), "wrong balance");
+    });
+
+    it('Test pause and unpause', async () => {
+        const jsonFile = "test/abi/BTCB.json";
+        const abi= JSON.parse(fs.readFileSync(jsonFile));
+
+        BTCBOwner = accounts[1];
+
+        const erc20 = new web3.eth.Contract(abi, AdminUpgradeabilityProxy.address);
+
+        await erc20.methods.pause().send({from: BTCBOwner, gas: 4700000});
+
+        const paused = await erc20.methods.paused().call({from: accounts[1]});
+        assert.equal(paused, true, "wrong balance");
+
+        try {
+            await erc20.methods.transfer(accounts[3], web3.utils.toBN(1e8)).send({from: accounts[4], gas: 4700000});
+            assert.fail();
+        } catch (error) {
+        }
+
+        await erc20.methods.unpause().send({from: BTCBOwner, gas: 4700000});
+
+        const balanceOld = await erc20.methods.balanceOf(accounts[6]).call({from: BTCBOwner});
+        assert.equal(balanceOld, web3.utils.toBN(0), "wrong balance");
+
+        await erc20.methods.transfer(accounts[6], web3.utils.toBN(1e8)).send({from: BTCBOwner, gas: 4700000});
+
+        const balanceNew = await erc20.methods.balanceOf(accounts[6]).call({from: BTCBOwner});
+        assert.equal(balanceNew, web3.utils.toBN(1e8), "wrong balance");
+    });
+
+    it('Test reclaim', async () => {
+        const jsonFile = "test/abi/BTCB.json";
+        const abi= JSON.parse(fs.readFileSync(jsonFile));
+
+        const abcToken = await ABCToken.deployed();
+
+        BTCBOwner = accounts[1];
+
+        const erc20 = new web3.eth.Contract(abi, AdminUpgradeabilityProxy.address);
+
+        const balance1 = await abcToken.balanceOf.call(AdminUpgradeabilityProxy.address);
+        console.log(balance1);
+        assert.equal(balance1, web3.utils.toBN(0), "wrong balance");
+
+        await abcToken.transfer(AdminUpgradeabilityProxy.address, web3.utils.toBN(1e18), {from: accounts[0]});
+
+        const balance2 = await abcToken.balanceOf.call(AdminUpgradeabilityProxy.address);
+        assert.equal(balance2, web3.utils.toBN(1e18), "wrong balance");
+
+        await erc20.methods.reclaimToken(ABCToken.address).send({from: BTCBOwner, gas: 4700000});
+
+        const balance3 = await abcToken.balanceOf.call(AdminUpgradeabilityProxy.address);
+        assert.equal(balance3, web3.utils.toBN(0), "wrong balance");
     });
 
 });
