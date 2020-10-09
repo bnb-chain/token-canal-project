@@ -271,7 +271,10 @@ contract DetailedERC20 is ERC20 {
     string public symbol;
     uint8 public decimals;
 
-    constructor(string _name, string _symbol, uint8 _decimals) public {
+    constructor() public {
+    }
+
+    function initializeDetailedERC20(string memory _name, string memory _symbol, uint8 _decimals) public {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
@@ -301,7 +304,10 @@ contract Ownable {
      * account.
      */
     constructor() public {
-        owner = msg.sender;
+    }
+
+    function initializeOwnable(address _owner) public {
+        owner = _owner;
     }
 
     /**
@@ -644,10 +650,22 @@ contract CanReclaimToken is Ownable {
 // empty block is used as this contract just inherits others.
 contract OwnableContract is CanReclaimToken, Claimable { } /* solhint-disable-line no-empty-blocks */
 
-// File: contracts/token/WBTC.sol
-
-contract WBTC is StandardToken, DetailedERC20("Wrapped BTC", "WBTC", 8),
+contract BinancePeggyTokenTest is StandardToken, DetailedERC20,
 MintableToken, BurnableToken, PausableToken, OwnableContract {
+
+    // INITIALIZATION DATA
+    bool public initialized = false;
+    /**
+     * @dev sets 0 initials tokens, the owner, and the supplyController.
+     * this serves as the constructor for the proxy but compiles to the
+     * memory model of the Implementation contract.
+     */
+    function initialize(string name, string symbol, uint8 decimals, address owner) public {
+        require(!initialized, "already initialized");
+        initializeDetailedERC20(name, symbol, decimals);
+        initializeOwnable(owner);
+        initialized = true;
+    }
 
     function burn(uint value) public onlyOwner {
         super.burn(value);
@@ -659,5 +677,9 @@ MintableToken, BurnableToken, PausableToken, OwnableContract {
 
     function renounceOwnership() public onlyOwner {
         revert("renouncing ownership is blocked");
+    }
+
+    function testUpgrade() public view returns (string) {
+        return "upgrade is successful";
     }
 }
