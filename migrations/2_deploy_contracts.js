@@ -1,6 +1,7 @@
 const BinancePeggyToken = artifacts.require("BinancePeggyToken");
 const BinancePeggyTokenTest = artifacts.require("BinancePeggyTokenTest");
 const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
+const BinancePeggyTokenFactory = artifacts.require("BinancePeggyTokenFactory");
 const ABCToken = artifacts.require("ABCToken");
 
 const Web3 = require('web3');
@@ -12,5 +13,6 @@ module.exports = function(deployer, network, accounts) {
     await deployer.deploy(BinancePeggyToken);
     await deployer.deploy(BinancePeggyTokenTest);
     await deployer.deploy(AdminUpgradeabilityProxy, BinancePeggyToken.address);
+    await deployer.deploy(BinancePeggyTokenFactory, BinancePeggyToken.address);
   });
 };
