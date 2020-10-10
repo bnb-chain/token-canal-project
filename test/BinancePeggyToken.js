@@ -1,14 +1,47 @@
 const BinancePeggyToken = artifacts.require("BinancePeggyToken");
 const BinancePeggyTokenTest = artifacts.require("BinancePeggyTokenTest");
 const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
+const BinancePeggyTokenFactory = artifacts.require("BinancePeggyTokenFactory");
 const ABCToken = artifacts.require("ABCToken");
 
+const truffleAssert = require('truffle-assertions');
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
 const fs = require('fs');
 
 contract('AdminUpgradeabilityProxy', (accounts) => {
+    it('Factory', async  () => {
+        const factoryIns = await BinancePeggyTokenFactory.deployed();
+        let tx = await factoryIns.createPeggyToken("Binance BTC","BTCB", 8, accounts[2], accounts[1]);
+        var token ;
+        truffleAssert.eventEmitted(tx, "TokenCreated",(ev) => {
+            token = ev.token;
+            return true;
+        });
+        const jsonFile = "test/abi/BTCB.json";
+        const abi= JSON.parse(fs.readFileSync(jsonFile));
+
+        BTCBOwner = accounts[2];
+
+        const erc20 = new web3.eth.Contract(abi, token);
+
+        const name = await erc20.methods.name().call({from: BTCBOwner});
+        assert.equal(name, "Binance BTC", "wrong token name");
+
+        const symbol = await erc20.methods.symbol().call({from: BTCBOwner});
+        assert.equal(symbol, "BTCB", "wrong token symbol");
+
+        const decimals = await erc20.methods.decimals().call({from: BTCBOwner});
+        assert.equal(decimals, 8, "wrong token decimals");
+
+        const totalSupply = await erc20.methods.totalSupply().call({from: BTCBOwner});
+        assert.equal(totalSupply, web3.utils.toBN(0), "wrong totalSupply");
+
+        const BTCBOwnerBalance = await erc20.methods.balanceOf(BTCBOwner).call({from: BTCBOwner});
+        assert.equal(BTCBOwnerBalance, web3.utils.toBN(0), "wrong balance");
+
+    });
     it('Initilize', async  () => {
         const BTCBOwner = accounts[1];
         const jsonFile = "test/abi/BTCB.json";
