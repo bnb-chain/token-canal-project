@@ -16,4 +16,4 @@
 node_modules/*
 .idea/*
 build/*
-contracts/ethereum/flattened
+contracts/ethereum/flattened/*.sol
