@@ -13,7 +13,7 @@
     "lint:js": "eslint test/**/*.js",
     "lint:sol:fix": "solium -d contracts/ --fix",
     "lint:sol": "solium -d contracts/",
-    "flatten": "truffle-flattener contracts/UpgradeableProxy.sol > contracts/flattened/UpgradeableProxy.sol && truffle-flattener contracts/BinanceBTC.sol > contracts/flattened/BinanceBTC.sol"
+    "flatten": "truffle-flattener contracts/ethereum/BinancePeggyToken.sol > contracts/ethereum/flattened/BinancePeggyToken.sol && truffle-flattener contracts/ethereum/BinancePeggyTokenFactory.sol > contracts/ethereum/flattened/BinancePeggyTokenFactory.sol && truffle-flattener contracts/ethereum/AdminUpgradeabilityProxy.sol > contracts/ethereum/flattened/AdminUpgradeabilityProxy.sol"
   },
   "author": "",
   "license": "MIT",
