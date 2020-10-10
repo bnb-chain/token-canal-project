@@ -1,4 +1,4 @@
-# Binance Peggy BTC 
+# Token Canal Project 
 
 ## Install dependency
 
