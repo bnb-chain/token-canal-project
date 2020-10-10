@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 
 import './AdminUpgradeabilityProxy.sol';
-import './interface/IBinancePeggyToken.sol';
+import '../interface/IBinancePeggyToken.sol';
 
 
 contract BinancePeggyTokenFactory {
