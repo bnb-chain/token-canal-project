@@ -274,7 +274,7 @@ contract DetailedERC20 is ERC20 {
     constructor() public {
     }
 
-    function initializeDetailedERC20(string memory _name, string memory _symbol, uint8 _decimals) public {
+    function initializeDetailedERC20(string memory _name, string memory _symbol, uint8 _decimals) internal {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
@@ -306,7 +306,7 @@ contract Ownable {
     constructor() public {
     }
 
-    function initializeOwnable(address _owner) public {
+    function initializeOwnable(address _owner) internal {
         owner = _owner;
     }
 
