@@ -9,6 +9,7 @@
     "truffle:test": "truffle test",
     "truffle:compile": "truffle compile",
     "truffle:migrate": "truffle migrate",
+    "coverage": "truffle run coverage --network development",
     "lint": "npm run lint:sol && npm run lint:js",
     "lint:js": "eslint test/**/*.js",
     "lint:sol:fix": "solium -d contracts/ --fix",
@@ -34,6 +35,7 @@
     "node-fetch": ">=2.6.1",
     "yargs-parser": ">=13.1.2",
     "mem": ">=4.0.0",
-    "lodash": ">=4.17.19"
+    "lodash": ">=4.17.19",
+    "solidity-coverage": "0.7.11"
   }
 }

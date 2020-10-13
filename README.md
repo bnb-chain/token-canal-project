@@ -42,3 +42,9 @@ npm run truffle:test
 ```shell script
 npm run flatten
 ```
+
+## Coverage
+
+```shell script
+npm run coverage
+```
