@@ -19,7 +19,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
             token = ev.token;
             return true;
         });
-        const jsonFile = "test/abi/BTCB.json";
+        const jsonFile = "test/abi/PeggyToken.json";
         const abi= JSON.parse(fs.readFileSync(jsonFile));
 
         BTCBOwner = accounts[2];
@@ -44,14 +44,14 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
     });
     it('Initilize', async  () => {
         const BTCBOwner = accounts[1];
-        const jsonFile = "test/abi/BTCB.json";
+        const jsonFile = "test/abi/PeggyToken.json";
         const abi= JSON.parse(fs.readFileSync(jsonFile));
 
         const binanceBTC = new web3.eth.Contract(abi, AdminUpgradeabilityProxy.address);
         await binanceBTC.methods.initialize("Binance BTC", "BTCB", 8, BTCBOwner).send({from: BTCBOwner, gas: 4700000});
     });
     it('Test ERC20 query methods', async () => {
-        const jsonFile = "test/abi/BTCB.json";
+        const jsonFile = "test/abi/PeggyToken.json";
         const abi= JSON.parse(fs.readFileSync(jsonFile));
 
         BTCBOwner = accounts[1];
@@ -74,7 +74,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         assert.equal(BTCBOwnerBalance, web3.utils.toBN(0), "wrong balance");
     });
     it('Test mint and burn', async () => {
-        const jsonFile = "test/abi/BTCB.json";
+        const jsonFile = "test/abi/PeggyToken.json";
         const abi= JSON.parse(fs.readFileSync(jsonFile));
 
         BTCBOwner = accounts[1];
@@ -98,7 +98,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
     });
 
     it('Test erc20 transaction methods', async () => {
-        const jsonFile = "test/abi/BTCB.json";
+        const jsonFile = "test/abi/PeggyToken.json";
         const abi= JSON.parse(fs.readFileSync(jsonFile));
 
         BTCBOwner = accounts[1];
@@ -118,6 +118,14 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         let allowance = await erc20.methods.allowance(BTCBOwner, accounts[3]).call({from: accounts[3]});
         assert.equal(allowance, web3.utils.toBN(2e8), "wrong allowance");
 
+        await erc20.methods.increaseApproval(accounts[3], web3.utils.toBN(2e8)).send({from: BTCBOwner, gas: 4700000});
+        allowance = await erc20.methods.allowance(BTCBOwner, accounts[3]).call({from: accounts[3]});
+        assert.equal(allowance, web3.utils.toBN(4e8), "wrong allowance");
+
+        await erc20.methods.decreaseApproval(accounts[3], web3.utils.toBN(2e8)).send({from: BTCBOwner, gas: 4700000});
+        allowance = await erc20.methods.allowance(BTCBOwner, accounts[3]).call({from: accounts[3]});
+        assert.equal(allowance, web3.utils.toBN(2e8), "wrong allowance");
+
         await erc20.methods.transferFrom(BTCBOwner, accounts[4], web3.utils.toBN(2e8)).send({from: accounts[3], gas: 4700000});
 
         allowance = await erc20.methods.allowance(BTCBOwner, accounts[3]).call({from: accounts[3]});
@@ -127,7 +135,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
     });
 
     it('Test pause and unpause', async () => {
-        const jsonFile = "test/abi/BTCB.json";
+        const jsonFile = "test/abi/PeggyToken.json";
         const abi= JSON.parse(fs.readFileSync(jsonFile));
 
         BTCBOwner = accounts[1];
@@ -145,6 +153,26 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         } catch (error) {
         }
 
+        await erc20.methods.transferOwnership(accounts[7]).send({from: BTCBOwner, gas: 4700000});
+        const pendingOwner = await erc20.methods.pendingOwner().call({from: accounts[7], gas: 4700000});
+        let newOwner = await erc20.methods.owner().call({from: accounts[7], gas: 4700000});
+        assert.equal(pendingOwner, accounts[7], "wrong pendingOwner");
+        assert.equal(newOwner, BTCBOwner, "wrong owner");
+
+        await erc20.methods.claimOwnership().send({from: accounts[7], gas: 4700000});
+
+        newOwner = await erc20.methods.owner().call({from: accounts[7], gas: 4700000});
+        assert.equal(newOwner, accounts[7], "wrong owner");
+
+        try {
+            await erc20.methods.unpause().send({from: BTCBOwner, gas: 4700000});
+            assert.fail();
+        } catch (error) {
+        }
+
+        await erc20.methods.transferOwnership(BTCBOwner).send({from: accounts[7], gas: 4700000});
+        await erc20.methods.claimOwnership().send({from: BTCBOwner, gas: 4700000});
+
         await erc20.methods.unpause().send({from: BTCBOwner, gas: 4700000});
 
         const balanceOld = await erc20.methods.balanceOf(accounts[6]).call({from: BTCBOwner});
@@ -157,7 +185,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
     });
 
     it('Test reclaim', async () => {
-        const jsonFile = "test/abi/BTCB.json";
+        const jsonFile = "test/abi/PeggyToken.json";
         const abi= JSON.parse(fs.readFileSync(jsonFile));
 
         const ERC20JsonFile = "test/abi/ERC20.json";
@@ -188,7 +216,28 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         const balance5 = await abcToken.methods.balanceOf(BTCBOwner).call();
         assert.equal(balance5, web3.utils.toBN(1e18), "wrong balance");
     });
+    it('Test renounceOwnership and finishMinting', async () => {
+        const upgradeProxyJsonFile = "test/abi/UpgradeProxy.json";
 
+        const jsonFile = "test/abi/PeggyTokenNew.json";
+        const abi= JSON.parse(fs.readFileSync(jsonFile));
+        const peggyToken = new web3.eth.Contract(abi, AdminUpgradeabilityProxy.address);
+
+        try {
+            await peggyToken.methods.renounceOwnership().send({from: BTCBOwner, gas: 4700000});
+            assert.fail();
+        } catch (error) {
+        }
+
+        const pendingOwner = await peggyToken.methods.pendingOwner().call({from: accounts[7], gas: 4700000});
+        let newOwner = await peggyToken.methods.owner().call({from: accounts[7], gas: 4700000});
+        assert.equal(pendingOwner, "0x0000000000000000000000000000000000000000", "wrong pendingOwner");
+        assert.equal(newOwner, BTCBOwner, "wrong owner");
+
+        await peggyToken.methods.finishMinting().send({from: BTCBOwner, gas: 4700000});
+        const mintingFinished = await peggyToken.methods.mintingFinished().call({from: accounts[7], gas: 4700000});
+        assert.equal(mintingFinished, false, "wrong mintingFinished");
+    });
     it('Test upgrade', async () => {
         const upgradeProxyJsonFile = "test/abi/UpgradeProxy.json";
         const upgradeProxyAbi= JSON.parse(fs.readFileSync(upgradeProxyJsonFile));
@@ -196,7 +245,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         const upgradeProxy = new web3.eth.Contract(upgradeProxyAbi, AdminUpgradeabilityProxy.address);
         admin = accounts[0];
 
-        const jsonFile = "test/abi/BTCBNew.json";
+        const jsonFile = "test/abi/PeggyTokenNew.json";
         const abi= JSON.parse(fs.readFileSync(jsonFile));
 
         const btcb = new web3.eth.Contract(abi, AdminUpgradeabilityProxy.address);

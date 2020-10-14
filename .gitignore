@@ -17,3 +17,5 @@ node_modules/*
 .idea/*
 build/*
 contracts/ethereum/flattened/*.sol
+coverage.json
+coverage/*

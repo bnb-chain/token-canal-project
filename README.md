@@ -13,6 +13,10 @@ For example, Binance.com will support BTC, BTC BEP2, and BTC BEP20 deposits and 
 
 Owner of `AdminUpgradeabilityProxy` can pause the contract by invoke `pause` to disable `transfer`, `transferFrom` and so on.
 
+## Transfer Ownership
+
+1. The current owner call `transferOwnership` method to claim a new address as the `pendingOwner`.
+2. The `pendingOwner` call `claimOwnership` to get the ownership.
 
 ## Upgrade
 1. Pause the contract first.
@@ -41,4 +45,10 @@ npm run truffle:test
 
 ```shell script
 npm run flatten
+```
+
+## Coverage
+
+```shell script
+npm run coverage
 ```
