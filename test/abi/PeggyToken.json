@@ -189,28 +189,6 @@
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "_name",
-        "type": "string"
-      },
-      {
-        "name": "_symbol",
-        "type": "string"
-      },
-      {
-        "name": "_decimals",
-        "type": "uint8"
-      }
-    ],
-    "name": "initializeDetailedERC20",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "constant": true,
     "inputs": [],
     "name": "paused",
@@ -345,20 +323,6 @@
         "type": "bool"
       }
     ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "_owner",
-        "type": "address"
-      }
-    ],
-    "name": "initializeOwnable",
-    "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
