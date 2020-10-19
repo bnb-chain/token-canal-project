@@ -15,9 +15,9 @@ contract BinancePeggyTokenFactory {
     }
 
     function createPeggyToken(string name, string symbol, uint8 decimals, address owner, address admin) external returns (address) {
-        AdminUpgradeabilityProxy token = new AdminUpgradeabilityProxy(logicImplement);
-        IBinancePeggyToken(address(token)).changeAdmin(admin);
-        IBinancePeggyToken(address(token)).initialize(name, symbol, decimals, owner);
+        IBinancePeggyToken token = IBinancePeggyToken(new AdminUpgradeabilityProxy(logicImplement));
+        token.changeAdmin(admin);
+        token.initialize(name, symbol, decimals, owner);
         emit TokenCreated(address(token));
         return address(token);
     }
