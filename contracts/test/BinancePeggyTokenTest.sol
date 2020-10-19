@@ -487,7 +487,7 @@ contract Pausable is Ownable {
  * @title Pausable token
  * @dev StandardToken modified with pausable transfers.
  **/
-contract PausableToken is StandardToken, Pausable {
+contract PausableToken is MintableToken,  BurnableToken, Pausable {
 
     function transfer(
         address _to,
@@ -543,6 +543,26 @@ contract PausableToken is StandardToken, Pausable {
     returns (bool success)
     {
         return super.decreaseApproval(_spender, _subtractedValue);
+    }
+
+    function mint(
+        address _to,
+        uint256 _amount
+    )
+    public
+    whenNotPaused
+    returns (bool success)
+    {
+        return super.mint(_to, _amount);
+    }
+
+    function burn(
+        uint256 _value
+    )
+    public
+    whenNotPaused
+    {
+        super.burn(_value);
     }
 }
 

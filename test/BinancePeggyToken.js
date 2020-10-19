@@ -153,6 +153,12 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         } catch (error) {
         }
 
+        try {
+            await erc20.methods.burn(web3.utils.toBN(1e8)).send({from: BTCBOwner, gas: 4700000});
+            assert.fail();
+        } catch (error) {
+        }
+
         await erc20.methods.transferOwnership(accounts[7]).send({from: BTCBOwner, gas: 4700000});
         const pendingOwner = await erc20.methods.pendingOwner().call({from: accounts[7], gas: 4700000});
         let newOwner = await erc20.methods.owner().call({from: accounts[7], gas: 4700000});
@@ -179,9 +185,9 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         assert.equal(balanceOld, web3.utils.toBN(0), "wrong balance");
 
         await erc20.methods.transfer(accounts[6], web3.utils.toBN(1e8)).send({from: BTCBOwner, gas: 4700000});
-
-        const balanceNew = await erc20.methods.balanceOf(accounts[6]).call({from: BTCBOwner});
+        let balanceNew = await erc20.methods.balanceOf(accounts[6]).call({from: BTCBOwner});
         assert.equal(balanceNew, web3.utils.toBN(1e8), "wrong balance");
+        await erc20.methods.burn(web3.utils.toBN(1e8)).send({from: BTCBOwner, gas: 4700000});
     });
 
     it('Test reclaim', async () => {
