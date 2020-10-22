@@ -41,6 +41,12 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         const BTCBOwnerBalance = await erc20.methods.balanceOf(BTCBOwner).call({from: BTCBOwner});
         assert.equal(BTCBOwnerBalance, web3.utils.toBN(0), "wrong balance");
 
+        try {
+            await factoryIns.createPeggyToken("Binance BTC","BTCB", 8, accounts[2], accounts[1],{from: accounts[3]});
+            assert.fail();
+        } catch (error) {
+        }
+
     });
     it('Initilize', async  () => {
         const BTCBOwner = accounts[1];
