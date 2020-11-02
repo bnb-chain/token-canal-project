@@ -9,6 +9,10 @@ For example, Binance.com will support BTC, BTC BEP2, and BTC BEP20 deposits and 
 2. AdminUpgradeabilityProxy.sol. It is an upgradable proxy contract with admin, and delegate request to it's implementation contract.
 3. BinancePeggyToken.sol. It is the implementation contract of Binance Peg token.
 
+## Audit
+
+[Audit Report](https://github.com/binance-chain/token-canal-project/blob/master/REP-Binance_Peggy_Token-23_10_2020.pdf)
+
 ## Pause & Unpause
 
 Owner of `AdminUpgradeabilityProxy` can pause the contract by invoke `pause` to disable `transfer`, `transferFrom` and so on.
