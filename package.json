@@ -35,7 +35,7 @@
     "node-fetch": ">=2.6.1",
     "yargs-parser": ">=13.1.2",
     "mem": ">=4.0.0",
-    "lodash": ">=4.17.19",
+    "lodash": ">=4.17.21",
     "solidity-coverage": "0.7.11"
   }
 }
