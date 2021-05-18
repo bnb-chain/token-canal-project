@@ -151,7 +151,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
         await erc20.methods.pause().send({from: BTCBOwner, gas: 4700000});
 
         const paused = await erc20.methods.paused().call({from: accounts[1]});
-        assert.equal(paused, true, "wrong balance");
+        assert.equal(paused, true, "wrong paused");
 
         try {
             await erc20.methods.transfer(accounts[3], web3.utils.toBN(1e8)).send({from: accounts[4], gas: 4700000});
