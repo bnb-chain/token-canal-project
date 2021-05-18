@@ -14,7 +14,7 @@ contract('AdminUpgradeabilityProxy', (accounts) => {
     it('Factory', async  () => {
         const factoryIns = await BinancePeggyTokenFactory.deployed();
         let tx = await factoryIns.createPeggyToken("Binance BTC","BTCB", 8, accounts[2], accounts[1]);
-        var token ;
+        var token;
         truffleAssert.eventEmitted(tx, "TokenCreated",(ev) => {
             token = ev.token;
             return true;
