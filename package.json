@@ -31,7 +31,7 @@
     "ethereum-input-data-decoder": "0.3.0",
     "rlp": "2.2.5",
     "elliptic": ">=6.5.3",
-    "minimist": ">=1.2.3",
+    "minimist": ">=1.2.6",
     "node-fetch": ">=2.6.1",
     "yargs-parser": ">=13.1.2",
     "mem": ">=4.0.0",
